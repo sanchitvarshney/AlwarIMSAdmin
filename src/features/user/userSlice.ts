@@ -600,9 +600,9 @@ const userSlice = createSlice({
       .addCase(fetchCompanyUsers.pending, (state) => {
         state.getCompanyUsersLoading = true;
       })
-      .addCase(fetchCompanyUsers.fulfilled, (state, action) => {
+      .addCase(fetchCompanyUsers.fulfilled, (state, action:any) => {
         state.getCompanyUsersLoading = false;
-        if (action.payload.data.code === 200) {
+        if (action.payload.data.success) {
           state.companyUsers = action.payload.data.data;
         }
       })
@@ -635,9 +635,9 @@ const userSlice = createSlice({
       .addCase(getCompanyManagementList.pending, (state) => {
         state.getCompanyManagementListLoading = true;
       })
-      .addCase(getCompanyManagementList.fulfilled, (state, action) => {
+      .addCase(getCompanyManagementList.fulfilled, (state, action:any) => {
         state.getCompanyManagementListLoading = false;
-        if (action.payload.data.code === 200) {
+        if (action.payload.data.success) {
           state.companyManagementList = action.payload.data.data;
         }
       })
@@ -648,9 +648,9 @@ const userSlice = createSlice({
       .addCase(getCompanyById.pending, (state) => {
         state.getCompanyDetailLoading = true;
       })
-      .addCase(getCompanyById.fulfilled, (state, action) => {
+      .addCase(getCompanyById.fulfilled, (state, action:any) => {
         state.getCompanyDetailLoading = false;
-        if (action.payload.data.code === 200) {
+        if (action.payload.data.success) {
           state.companyDetail = action.payload.data.data;
         }
       })
@@ -678,9 +678,10 @@ const userSlice = createSlice({
       .addCase(fetchSignupRequests.pending, (state) => {
         state.getSignupRequestsLoading = true;
       })
-      .addCase(fetchSignupRequests.fulfilled, (state, action) => {
+      .addCase(fetchSignupRequests.fulfilled, (state, action:any) => {
         state.getSignupRequestsLoading = false;
-        if (action.payload.data.code === 200) {
+      
+        if (action.payload.data.success) {
           state.signupRequests = action.payload.data.data;
         } else {
           state.signupRequests = [];
@@ -696,7 +697,7 @@ const userSlice = createSlice({
       .addCase(approveSignup.fulfilled, (state, action) => {
         state.approveSignupLoading = false;
         if (
-          action.payload?.data?.code === 200 ||
+          action.payload?.data?.success ||
           action.payload?.data?.success
         ) {
           showToast(
@@ -717,7 +718,7 @@ const userSlice = createSlice({
       .addCase(rejectSignup.fulfilled, (state, action) => {
         state.rejectSignupLoading = false;
         if (
-          action.payload?.data?.code === 200 ||
+          action.payload?.data?.success ||
           action.payload?.data?.success
         ) {
           showToast(
@@ -736,9 +737,9 @@ const userSlice = createSlice({
       .addCase(fetchPOTeamMembers.pending, (state) => {
         state.getPOTeamLoading = true;
       })
-      .addCase(fetchPOTeamMembers.fulfilled, (state, action) => {
+      .addCase(fetchPOTeamMembers.fulfilled, (state, action:any) => {
         state.getPOTeamLoading = false;
-        if (action.payload.data.code === 200) {
+        if (action.payload.data.success) {
           state.poTeamMembers = action.payload.data.data;
         } else {
           state.poTeamMembers = [];
@@ -754,7 +755,7 @@ const userSlice = createSlice({
       .addCase(addPOTeamMember.fulfilled, (state, action) => {
         state.addPOTeamLoading = false;
         if (
-          action.payload?.data?.code === 200 ||
+          action.payload?.data?.success ||
           action.payload?.data?.success
         ) {
           const rawMsg = action.payload?.data?.message;
@@ -779,7 +780,7 @@ const userSlice = createSlice({
       .addCase(deletePOTeamMember.fulfilled, (state, action) => {
         state.deletePOTeamLoading = false;
         if (
-          action.payload?.data?.code === 200 ||
+          action.payload?.data?.success ||
           action.payload?.data?.success
         ) {
           const rawMsg = action.payload?.data?.message;
@@ -801,9 +802,9 @@ const userSlice = createSlice({
       .addCase(searchUsers.pending, (state) => {
         state.getUsersLoading = true;
       })
-      .addCase(searchUsers.fulfilled, (state, action) => {
+      .addCase(searchUsers.fulfilled, (state, action:any) => {
         state.getUsersLoading = false;
-        if (action.payload.data.code === 200) {
+        if (action.payload.data.success) {
           state.users = action.payload.data.data;
         } else {
           state.users = [];
