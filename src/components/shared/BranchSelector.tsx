@@ -19,7 +19,6 @@ const BranchSelector: React.FC = () => {
 
   const handleBranchChange = (value: string) => {
     setSelectedBranch(value);
-    // You can add additional logic here when branch changes
     localStorage.setItem("company-branch", value);
   };
 
