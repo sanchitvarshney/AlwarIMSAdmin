@@ -35,7 +35,7 @@ axiosInstance.interceptors.request.use(async (config) => {
     config.headers["session"] = "25-26";
     config.headers["x-click-token"] = uniqueid;
     config.headers["fingerprint"] = fingerprint || "unknown";
-    config.headers["company-branch"] = localStorage.getItem("company-branch")||"BRMSC012";
+    config.headers["company-branch"] = localStorage.getItem("company-branch")||"BRALWR36";
   }
 
   return config;

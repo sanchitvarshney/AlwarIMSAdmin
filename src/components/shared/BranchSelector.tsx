@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 
 const options = [
-  { label: "A-21 [BRMSC012]", value: "BRMSC012" },
+  { label: "B-36 [ALWAR]", value: "BRALWR36" },
   { label: "B-29 [BRMSC029]", value: "BRMSC029" },
 ];
 
