@@ -19,6 +19,7 @@ import ImsDashboard from "@/pages/dashboard/ImsDashboard";
 import LocationLayout from "@/layouts/LocationLayout";
 import LocationList from "@/pages/location/LocationList";
 import AllotLocationPage from "@/pages/location/AllotLocationPage";
+import HistoryManagement from "@/pages/history/HistoryManagement";
 
 export const router = createBrowserRouter([
   {
@@ -102,6 +103,10 @@ export const router = createBrowserRouter([
             <AllotLocationPage />
           </LocationLayout>
         ),
+      },
+      {
+        path: "/history",
+        element: <HistoryManagement />,
       },
     ],
   },

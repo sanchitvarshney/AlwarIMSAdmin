@@ -58,6 +58,12 @@ const menuItems = [
     icon: Icons.location,
     navigateTo: "/location/list",
   },
+  {
+    title: "History",
+    tab: "history",
+    icon: Icons.history,
+    navigateTo: "/history",
+  },
 
   // {
   //   title: "Admin",

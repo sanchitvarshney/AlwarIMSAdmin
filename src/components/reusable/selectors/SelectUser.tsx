@@ -1,24 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Autocomplete,
   CircularProgress,
   TextField,
   Typography,
 } from "@mui/material";
-import useDebounce from "@/hooks/useDebounce";
-import axiosInstance from "@/api/spigenDashApi";
+
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHook";
+import { userList } from "@/features/history/historySlice";
 
 export type UserType = {
   id: string;
   text: string;
 };
 
-type UserApiResponse = {
-  status: string;
-  message: string;
-  success: boolean;
-  data: UserType[];
-};
 
 type Props = {
   onChange: (value: UserType | null) => void;
@@ -43,68 +38,45 @@ const SelectUser: React.FC<Props> = ({
   required = false,
   size = "medium",
 }) => {
-  const [inputValue, setInputValue] = useState("");
-  const debouncedInputValue = useDebounce(inputValue, 300);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [userList, setUserList] = useState<UserType[]>([]);
+ const dispatch = useAppDispatch();
+   const { userListLoading, userListData } = useAppSelector((state) => state.history);
 
   // Fetch users based on search input
-  const fetchUsers = async (query: string | null) => {
-    setLoading(true);
-    try {
-      const response = await axiosInstance.get<UserApiResponse>(
-        `/user/users?status=1&search=${query}`
-      );
-      if (response.data.success) {
-        setUserList(response.data.data);
-      } else {
-        setUserList([]);
-        console.warn("Failed to fetch users:", response.data.message);
-      }
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    } finally {
-      setLoading(false);
-    }
+  const fetchUsers = async () => {
+       dispatch(userList())
   };
 
-  useEffect(() => {
-    if (debouncedInputValue) {
-      fetchUsers(debouncedInputValue);
-    }
-  }, [debouncedInputValue]);
+ 
 
   return (
     <Autocomplete
-      onFocus={() => fetchUsers("")}
+      onFocus={fetchUsers}
       value={value}
       size={size}
-      options={userList || []}
-      getOptionLabel={(option) => `${option.text.split("-")[0]}`}
-      filterOptions={(options) => options} // Disable filtering
+      options={userListData || []}
+      getOptionLabel={(option:any) => `${option?.username?.split("-")[0]}`}
+      filterOptions={(options) => options} 
       filterSelectedOptions
       onChange={(_, value) => {
         onChange(value);
       }}
-      loading={loading}
-      isOptionEqualToValue={(option, value) => option.id === value?.id}
-      onInputChange={(_, newInputValue, reason) => {
-        (reason === "input" || reason === "clear") &&
-          setInputValue(newInputValue);
-      }}
+      loading={userListLoading}
+      isOptionEqualToValue={(option:any, value:any) => option.custID === value?.custID}
+    
       renderInput={(params) => (
         <TextField
           required={required}
           error={error}
           helperText={helperText}
           {...params}
-          label={label}
+          // label={label}
+          placeholder={label}
           variant={varient}
           InputProps={{
             ...params.InputProps,
             endAdornment: (
               <>
-                {loading ? (
+                {userListLoading ? (
                   <CircularProgress color="inherit" size={20} />
                 ) : null}
                 {params.InputProps.endAdornment}
@@ -113,13 +85,13 @@ const SelectUser: React.FC<Props> = ({
           }}
         />
       )}
-      renderOption={(props, option) => (
+      renderOption={(props, option:any) => (
         <li
           {...props}
           className="flex flex-col px-[10px] py-[5px] hover:bg-cyan-50 cursor-pointer"
         >
-          <Typography fontWeight={500}>{option.text.split("-")[0]}</Typography>
-          <Typography fontSize={12}>{option.text.split("-")[1]}</Typography>
+          <Typography fontWeight={500}>{option.username.split("-")[0]}</Typography>
+          <Typography fontSize={12}>{option.username.split("-")[1]}</Typography>
         </li>
       )}
       sx={{ width }}

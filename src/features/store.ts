@@ -8,6 +8,7 @@ import ProfileSlice from "@/features/profile/ProfileSlice";
 import dashboardReducer from "@/features/dashboard/dashboardSlice";
 import adminReducer from "@/features/admin/adminSlice";
 import imsDashboardReducer from "@/features/dashboard/imsDashboardSlice";
+import historyReducer from "@/features/history/historySlice";
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +21,7 @@ export const store = configureStore({
     dashboard: dashboardReducer,
     admin: adminReducer,
     imsDashboard: imsDashboardReducer,
+    history: historyReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
