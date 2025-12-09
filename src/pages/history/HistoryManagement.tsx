@@ -123,7 +123,7 @@ const HistoryManagement: React.FC = () => {
                 <TextField
                   {...field}
                   label="Title"
-                  variant="outlined"
+                  variant="filled"
                   error={!!errors.title}
                   helperText={errors.title?.message}
                   fullWidth
@@ -143,7 +143,7 @@ const HistoryManagement: React.FC = () => {
                   <TextField
                     {...field}
                     label="Description"
-                    variant="outlined"
+                    variant="filled"
                     multiline
                     rows={10}
                     error={!!errors.description}
@@ -162,7 +162,7 @@ const HistoryManagement: React.FC = () => {
                 <TextField
                   {...field}
                   label="Video URL"
-                  variant="outlined"
+                  variant="filled"
                   error={!!errors.video_url}
                   helperText={errors.video_url?.message}
                   fullWidth
@@ -179,7 +179,7 @@ const HistoryManagement: React.FC = () => {
                 <TextField
                   {...field}
                   label="Document URL"
-                  variant="outlined"
+                  variant="filled"
                   error={!!errors.doc_url}
                   helperText={errors.doc_url?.message}
                   fullWidth
@@ -198,7 +198,7 @@ const HistoryManagement: React.FC = () => {
                   {...field}
                   label="Date"
                   type="date"
-                  variant="outlined"
+                  variant="filled"
                   error={!!errors.date}
                   helperText={errors.date?.message}
                   fullWidth
@@ -221,7 +221,7 @@ const HistoryManagement: React.FC = () => {
                   }
                 }}
                 label="Created By"
-                varient="outlined"
+                varient="filled"
                 error={!!errors.created_by}
                 helperText={errors.created_by?.message}
                 required

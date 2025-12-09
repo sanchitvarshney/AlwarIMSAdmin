@@ -18,7 +18,7 @@ const HistoryLayout: React.FC<Props> = ({ children }) => {
       <div className="min-w-[250px]">
         <div className="h-[50px] flex items-center px-[10px]">
           <Typography fontWeight={600} variant="h2" fontSize={20}>
-            History
+            Changelog
           </Typography>
         </div>
         <List sx={{ pr: 1 }}>
@@ -33,7 +33,7 @@ const HistoryLayout: React.FC<Props> = ({ children }) => {
             className="link"
           >
             <Typography fontSize={17} fontWeight={500}>
-              Add New Changelog
+              Add 
             </Typography>
           </ListItemButton>
           <ListItemButton
@@ -47,7 +47,7 @@ const HistoryLayout: React.FC<Props> = ({ children }) => {
             className="link"
           >
             <Typography fontSize={17} fontWeight={500}>
-              View Changelog
+              View 
             </Typography>
           </ListItemButton>
         </List>

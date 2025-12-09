@@ -9,7 +9,6 @@ import {
 
 const options = [
   { label: "B-36 [ALWAR]", value: "BRALWR36" },
-  { label: "B-29 [BRMSC029]", value: "BRMSC029" },
 ];
 
 const BranchSelector: React.FC = () => {

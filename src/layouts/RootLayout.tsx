@@ -59,8 +59,8 @@ const menuItems = [
     navigateTo: "/location/list",
   },
   {
-    title: "History",
-    tab: "history",
+    title: "Changelog",
+    tab: "change",
     icon: Icons.history,
     navigateTo: "/history",
   },
