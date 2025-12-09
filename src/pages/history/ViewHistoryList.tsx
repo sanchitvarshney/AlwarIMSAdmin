@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "@/hooks/useReduxHook";
 import { AgGridReact } from "@ag-grid-community/react";
@@ -5,179 +6,249 @@ import { ColDef } from "@ag-grid-community/core";
 import CustomLoadingOverlay from "@/components/reusable/CustomLoadingOverlay";
 import { OverlayNoRowsTemplate } from "@/components/reusable/OverlayNoRowsTeplate";
 import { Icons } from "@/components/icons/icons";
-import { useEffect } from "react";
-import { getHistoryList, deleteHistory } from "@/features/history/historySlice";
-import { IconButton, Tooltip } from "@mui/material";
+import {
+  getHistoryList,
+  deleteHistory,
+  updateHistory,
+} from "@/features/history/historySlice";
+import {
+  IconButton,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  TextField,
+  DialogActions,
+  Button,
+} from "@mui/material";
 import SharedDialog from "@/components/shared/SharedDialog";
 import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import SelectUser from "@/components/reusable/selectors/SelectUser";
+import LoadingButton from "@mui/lab/LoadingButton";
+
+// Define Zod schema for edit form
+const editSchema = z.object({
+  date: z.string().min(1, "Date is required"),
+  title: z.string().min(1, "Title is required"),
+  description: z.any(),
+  video_url: z.string().optional(),
+  doc_url: z.string().optional(),
+  created_by: z.string().min(1, "Created by is required"),
+});
+
+type EditFormValues = z.infer<typeof editSchema>;
 
 const ViewHistoryList = () => {
   const dispatch = useAppDispatch();
-  const { historyList, historyListLoading, deleteHistoryLoading } = useAppSelector(
-    (state) => state.history
-  );
+  const {
+    historyList,
+    historyListLoading,
+    deleteHistoryLoading,
+    updateHistoryLoading,
+  } = useAppSelector((state) => state.history);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedHistory, setSelectedHistory] = useState<any | null>(null);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
 
-  const columns: ColDef[] = [
-    {
-      field: "date",
-      headerName: "Date",
-      minWidth: 150,
-      maxWidth: 200,
-      filter: true,
-      cellRenderer: (params: any) => {
-        if (!params.value) return "-";
-        const date = new Date(params.value);
-        return date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        });
+  const {
+    handleSubmit: handleEditSubmit,
+    reset: resetEditForm,
+    control: editControl,
+    setValue: setEditValue,
+    formState: { errors: editErrors },
+  } = useForm<EditFormValues>({
+    resolver: zodResolver(editSchema),
+    defaultValues: {
+      date: "",
+      title: "",
+      description: "",
+      video_url: "",
+      doc_url: "",
+      created_by: "",
+    },
+  });
+
+  useEffect(() => {
+    if (selectedHistory && editDialogOpen) {
+      setEditValue(
+        "date",
+        selectedHistory.date
+          ? new Date(selectedHistory.date).toISOString().split("T")[0]
+          : ""
+      );
+      setEditValue("title", selectedHistory.title || "");
+      setEditValue("description", selectedHistory.description || "");
+      setEditValue("video_url", selectedHistory.videoUrl || "");
+      setEditValue(
+        "doc_url",
+        selectedHistory.docUrl || selectedHistory.doc_url || ""
+      );
+      setEditValue("created_by", selectedHistory.createdBy || "");
+    }
+  }, [selectedHistory, editDialogOpen, setEditValue]);
+
+  const handleEditClick = useCallback(
+    (historyItem: any) => {
+      setSelectedHistory(historyItem);
+      setEditDialogOpen(true);
+      if (historyItem.createdBy) {
+        const user = historyList?.find(
+          (u: any) => u.custID === historyItem.createdBy
+        );
+        setSelectedUser(user || null);
+      }
+    },
+    [historyList]
+  );
+
+  const handleEditSubmitForm = (data: EditFormValues) => {
+    if (!selectedHistory?.id) return;
+    const payload: any = {
+      date: data.date,
+      title: data.title,
+      description: data.description,
+      videoUrl: data.video_url || "",
+      docUrl: data.doc_url || "",
+      createdBy: data.created_by,
+    };
+
+    dispatch(updateHistory({ id: selectedHistory.changelogId, payload })).then(
+      (res: any) => {
+        if (res.payload?.data?.success) {
+          dispatch(getHistoryList());
+          setEditDialogOpen(false);
+          setSelectedHistory(null);
+          setSelectedUser(null);
+          resetEditForm();
+        }
+      }
+    );
+  };
+
+  const handleDeleteClick = useCallback((id: string) => {
+    setPendingDelete(id);
+    setConfirmOpen(true);
+  }, []);
+
+  const columns: ColDef[] = useMemo(
+    () => [
+      {
+        field: "date",
+        headerName: "Date",
+        minWidth: 150,
+        maxWidth: 200,
+        filter: true,
+        cellRenderer: (params: any) => {
+          if (!params.value) return "-";
+          const date = new Date(params.value);
+          return date.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          });
+        },
+        flex: 1,
       },
-      flex: 1,
-    },
-    {
-      field: "title",
-      headerName: "Title",
-      minWidth: 200,
-      maxWidth: 400,
-      filter: true,
-      flex: 1,
-      cellRenderer: (params: any) => (
-        <div className="py-[5px]">
-          <span className="text-slate-700 font-medium">{params.value || "-"}</span>
-        </div>
-      ),
-      autoHeight: true,
-    },
-    {
-      field: "description",
-      headerName: "Description",
-      minWidth: 300,
-      maxWidth: 500,
-      filter: true,
-      flex: 1,
-      cellRenderer: (params: any) => {
-        const description = params.value || "";
-        const truncated = description.length > 100 
-          ? description.substring(0, 100) + "..." 
-          : description;
-        return (
+      {
+        field: "title",
+        headerName: "Title",
+        minWidth: 200,
+        maxWidth: 400,
+        filter: true,
+        flex: 1,
+        cellRenderer: (params: any) => (
           <div className="py-[5px]">
-            <Tooltip title={description || ""}>
-              <span className="text-slate-600">{truncated || "-"}</span>
-            </Tooltip>
+            <span className="text-slate-700 font-medium">
+              {params.value || "-"}
+            </span>
           </div>
-        );
+        ),
+        autoHeight: true,
       },
-      autoHeight: true,
-    },
-    {
-      field: "created_by_name",
-      headerName: "Created By",
-      minWidth: 150,
-      maxWidth: 250,
-      filter: true,
-      flex: 1,
-      cellRenderer: (params: any) => (
-        <div className="py-[5px]">
-          <span className="text-slate-700">{params.value || params.data?.created_by || "-"}</span>
-        </div>
-      ),
-    },
-    {
-      field: "video_url",
-      headerName: "Video URL",
-      minWidth: 100,
-      maxWidth: 150,
-      flex: 1,
-      cellRenderer: (params: any) => {
-        if (!params.value) return <span className="text-gray-400">-</span>;
-        return (
-          <Tooltip title={params.value}>
-            <a
-              href={params.value}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline flex items-center gap-1"
-            >
-              <Icons.followLink fontSize="small" />
-              View
-            </a>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      field: "doc_url",
-      headerName: "Document URL",
-      minWidth: 100,
-      maxWidth: 150,
-      flex: 1,
-      cellRenderer: (params: any) => {
-        if (!params.value) return <span className="text-gray-400">-</span>;
-        return (
-          <Tooltip title={params.value}>
-            <a
-              href={params.value}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline flex items-center gap-1"
-            >
-              <Icons.followLink fontSize="small" />
-              View
-            </a>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      field: "created_date",
-      headerName: "Created Date",
-      minWidth: 180,
-      maxWidth: 250,
-      filter: true,
-      flex: 1,
-      cellRenderer: (params: any) => {
-        if (!params.value) return "-";
-        const date = new Date(params.value);
-        return date.toLocaleString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-      },
-    },
-    {
-      headerName: "Actions",
-      minWidth: 120,
-      maxWidth: 150,
-      pinned: "right",
-      cellRenderer: (params: any) => {
-        return (
-          <div className="flex items-center gap-2">
-            <Tooltip title="Delete">
-              <IconButton
-                size="small"
-                color="error"
-                onClick={() => {
-                  setPendingDelete(params.data.id);
-                  setConfirmOpen(true);
-                }}
-                disabled={deleteHistoryLoading}
-              >
-                <Icons.delete fontSize="small" />
-              </IconButton>
-            </Tooltip>
+
+      {
+        field: "createdBy",
+        headerName: "Created By",
+        minWidth: 150,
+        maxWidth: 250,
+        filter: true,
+        flex: 1,
+        cellRenderer: (params: any) => (
+          <div className="py-[5px]">
+            <span className="text-slate-700">
+              {params.value || params.data?.createdBy || "-"}
+            </span>
           </div>
-        );
+        ),
       },
-    },
-  ];
+
+      {
+        field: "createdAt",
+        headerName: "Created Date",
+        minWidth: 180,
+        maxWidth: 250,
+        filter: true,
+        flex: 1,
+        cellRenderer: (params: any) => {
+          if (!params.value) return "-";
+          const date = new Date(params.value);
+          return date.toLocaleString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        },
+      },
+
+      {
+        headerName: "Actions",
+        minWidth: 180,
+        maxWidth: 220,
+        pinned: "right",
+        cellRenderer: (params: any) => {
+          return (
+            <div className="flex items-center gap-2">
+              <Tooltip title="Edit">
+                <IconButton
+                  size="small"
+                  color="primary"
+                  onClick={() => handleEditClick(params.data)}
+                  disabled={updateHistoryLoading}
+                >
+                  <Icons.edit fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Delete">
+                <IconButton
+                  size="small"
+                  color="error"
+                  onClick={() => handleDeleteClick(params.data.changelogId)}
+                  disabled={deleteHistoryLoading}
+                >
+                  <Icons.delete fontSize="small" />
+                </IconButton>
+              </Tooltip>
+         
+            </div>
+          );
+        },
+      },
+    ],
+    [
+      handleEditClick,
+      handleDeleteClick,
+      updateHistoryLoading,
+      deleteHistoryLoading,
+    ]
+  );
 
   const handleConfirmDelete = () => {
     if (!pendingDelete) return;
@@ -188,6 +259,13 @@ const ViewHistoryList = () => {
       setConfirmOpen(false);
       setPendingDelete(null);
     });
+  };
+
+  const handleCloseEditDialog = () => {
+    setEditDialogOpen(false);
+    setSelectedHistory(null);
+    setSelectedUser(null);
+    resetEditForm();
   };
 
   useEffect(() => {
@@ -220,10 +298,11 @@ const ViewHistoryList = () => {
 
       <SharedDialog
         open={confirmOpen}
-        title="Confirm Delete"
+        title={"Confirm Delete"}
         content={
           <div>
-            Are you sure you want to delete this changelog entry? This action cannot be undone.
+            Are you sure you want to delete this changelog entry? This action
+            cannot be undone.
           </div>
         }
         loading={deleteHistoryLoading}
@@ -232,13 +311,153 @@ const ViewHistoryList = () => {
           setPendingDelete(null);
         }}
         onConfirm={handleConfirmDelete}
-        confirmText="Yes, delete"
+        confirmText={"Yes, delete"}
         cancelText="Cancel"
-        color="error"
+        color={pendingDelete ? "error" : "primary"}
       />
+
+      {/* Edit Dialog */}
+      <Dialog
+        open={editDialogOpen}
+        onClose={handleCloseEditDialog}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Edit Changelog</DialogTitle>
+        <form onSubmit={handleEditSubmit(handleEditSubmitForm)}>
+          <DialogContent>
+            <div className="grid grid-cols-2 gap-4 mt-2">
+              <div className="col-span-2">
+                <Controller
+                  name="title"
+                  control={editControl}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Title"
+                      variant="outlined"
+                      error={!!editErrors.title}
+                      helperText={editErrors.title?.message}
+                      fullWidth
+                      margin="normal"
+                    />
+                  )}
+                />
+              </div>
+
+              <div className="col-span-2">
+                <Controller
+                  name="description"
+                  control={editControl}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Description"
+                      variant="outlined"
+                      multiline
+                      rows={6}
+                      error={!!editErrors.description}
+                      fullWidth
+                      margin="normal"
+                    />
+                  )}
+                />
+              </div>
+
+              <Controller
+                name="video_url"
+                control={editControl}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Video URL"
+                    variant="outlined"
+                    error={!!editErrors.video_url}
+                    helperText={editErrors.video_url?.message}
+                    fullWidth
+                    margin="normal"
+                    placeholder="https://example.com/video.mp4"
+                  />
+                )}
+              />
+
+              <Controller
+                name="doc_url"
+                control={editControl}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Document URL"
+                    variant="outlined"
+                    error={!!editErrors.doc_url}
+                    helperText={editErrors.doc_url?.message}
+                    fullWidth
+                    margin="normal"
+                    placeholder="https://example.com/document.pdf"
+                  />
+                )}
+              />
+
+              <Controller
+                name="date"
+                control={editControl}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Date"
+                    type="date"
+                    variant="outlined"
+                    error={!!editErrors.date}
+                    helperText={editErrors.date?.message}
+                    fullWidth
+                    margin="normal"
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+                )}
+              />
+
+              <div className="col-span-1 mt-4">
+                <SelectUser
+                  value={selectedUser}
+                  onChange={(value: any) => {
+                    setSelectedUser(value);
+                    if (value) {
+                      setEditValue("created_by", value.custID);
+                    } else {
+                      setEditValue("created_by", "");
+                    }
+                  }}
+                  label="Created By"
+                  varient="outlined"
+                  error={!!editErrors.created_by}
+                  helperText={editErrors.created_by?.message}
+                  required
+                />
+              </div>
+            </div>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={handleCloseEditDialog}
+              disabled={updateHistoryLoading}
+            >
+              Cancel
+            </Button>
+            <LoadingButton
+              type="submit"
+              loading={updateHistoryLoading}
+              variant="contained"
+              startIcon={<Icons.save fontSize="small" />}
+            >
+              Update
+            </LoadingButton>
+          </DialogActions>
+        </form>
+      </Dialog>
     </div>
   );
 };
 
 export default ViewHistoryList;
-

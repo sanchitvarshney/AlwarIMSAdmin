@@ -29,8 +29,8 @@ export const createHistory = createAsyncThunk<
 export const getHistoryList = createAsyncThunk<
   AxiosResponse<HistoryResponse>,
   void
->("history/getHistoryList", async () => {
-  const response = await axiosInstance.get("/history/list");
+>("history/fetch", async () => {
+  const response = await axiosInstance.get("/changelog/fetch");
   return response;
 });
 
@@ -45,9 +45,9 @@ export const userList = createAsyncThunk<
 
 export const updateHistory = createAsyncThunk<
   AxiosResponse<HistoryResponse>,
-  { id: string; payload: CreateHistoryType }
+  { id: string; payload: any;}
 >("history/updateHistory", async ({ id, payload }) => {
-  const response = await axiosInstance.put(`/history/update/${id}`, payload);
+  const response = await axiosInstance.put(`/changelog/edit/${id}?status=${payload.status}`, payload);
   return response;
 });
 
@@ -55,7 +55,7 @@ export const deleteHistory = createAsyncThunk<
   AxiosResponse<HistoryResponse>,
   string
 >("history/deleteHistory", async (id) => {
-  const response = await axiosInstance.delete(`/history/delete/${id}`);
+  const response = await axiosInstance.delete(`/changelog/delete/${id}`);
   return response;
 });
 
