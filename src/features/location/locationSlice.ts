@@ -58,6 +58,7 @@ export const getLocationList = createAsyncThunk<
   AxiosResponse<LocationListResponse>
 >("location/getLocationList", async () => {
   const response = await axiosInstance.get("/location/fetch_loc_all");
+
   return response;
 });
 
@@ -103,7 +104,8 @@ const locationSlice = createSlice({
       })
       .addCase(getLocationList.fulfilled, (state, action) => {
         const { data } = action.payload;
-        if (data?.code == 200) {
+       
+        if (data?.success) {
           state.locationList = data?.data;
         }
         state.loading = false;
@@ -119,7 +121,7 @@ const locationSlice = createSlice({
       })
       .addCase(getAllocatedLocationList.fulfilled, (state, action) => {
         const { data } = action.payload;
-        if (data?.code === 200) {
+        if (data?.success) {
           state.allotLocationList = data?.data;
         }
         state.disableMenuLoading = false;
@@ -135,7 +137,7 @@ const locationSlice = createSlice({
       })
       .addCase(getAllLocations.fulfilled, (state, action) => {
         const { data } = action.payload;
-        if (data?.code === 200) {
+        if (data?.success) {
           state.locationList = (data?.data || []).map((l: any) => ({
             code: l.location_key,
             name: l.loc_name,
@@ -163,7 +165,7 @@ const locationSlice = createSlice({
       })
       .addCase(allotLocation.fulfilled, (state, action) => {
         const { data } = action.payload;
-        if (data?.code === 200) {
+        if (data?.success) {
           showToast(data?.message, "success");
         }
         state.allotLocationLoading = false;
