@@ -41,10 +41,10 @@ const CompanyManagement: React.FC = () => {
         getCompanyById({ company_id: companyId })
       )) as any;
 
-      if (result.payload?.data?.code === 200) {
+      if (result.payload?.data?.success) {
         setSelectedCompany(result.payload.data.data);
       } else {
-        console.error("API Error:", result.payload?.data);
+        console.error("API Error:", result.payload?.data?.message);
         showToast("Failed to fetch company details", "error");
       }
     } catch (error) {

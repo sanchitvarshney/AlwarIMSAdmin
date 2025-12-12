@@ -82,7 +82,7 @@ const LocationAllocation: React.FC<SharedDialogProps> = ({
     if (id) {
       dispatch(fetchLocationUpdate(id)).then((res: any) => {
         console.log(res);
-        if (res?.payload?.data?.code == 200) {
+        if (res?.payload?.data?.success) {
           setCheckedLocations(res.payload.data.data[0]);
           const locations = res.payload.data.data[0].locations;
           console.log(locations, locations.split(","));
@@ -109,7 +109,7 @@ const LocationAllocation: React.FC<SharedDialogProps> = ({
       module_description: moduleDescription,
     };
     dispatch(updateAllotLocation(payload)).then((res: any) => {
-      if (res?.payload?.data?.code === 200) {
+      if (res?.payload?.data?.success) {
         showToast(res.payload.data.message, "success");
         onClose();
         dispatch(getAllocatedLocationList());

@@ -109,8 +109,8 @@ const ViewUser = () => {
       status: nextStatus,
     };
     dispatch(updateCompanyUserStatus(payload)).then((res: any) => {
-      const code = res?.payload?.data?.code;
-      if (code === 200) {
+      const code = res?.payload?.data?.success;
+      if (code) {
         showToast(
           res?.payload?.data?.message || "User status updated",
           "success"

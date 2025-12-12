@@ -37,7 +37,7 @@ const OtpPage: React.FC = () => {
       localStorage.setItem("token", qrStatus?.token ?? "");
         dispatch(getQRStatus({ crnId: qrStatus?.token ?? "" })).then(
           (res: any) => {
-            if (res.payload.data.code === 200) {
+            if (res.payload.data.success) {
               setQrCode(res.payload.data.data.url); // Set the QR code from the backend
               setSecretKey(res.payload.data.data.secret);
             }
