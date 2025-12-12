@@ -141,9 +141,8 @@ const ViewHistoryList = () => {
       {
         field: "date",
         headerName: "Date",
-        minWidth: 150,
-        maxWidth: 200,
         filter: true,
+        align: "center",
         cellRenderer: (params: any) => {
           if (!params.value) return "-";
           const date = new Date(params.value);
@@ -158,8 +157,6 @@ const ViewHistoryList = () => {
       {
         field: "title",
         headerName: "Title",
-        minWidth: 200,
-        maxWidth: 400,
         filter: true,
         flex: 1,
         cellRenderer: (params: any) => (
@@ -175,8 +172,6 @@ const ViewHistoryList = () => {
       {
         field: "createdBy",
         headerName: "Created By",
-        minWidth: 150,
-        maxWidth: 250,
         filter: true,
         flex: 1,
         cellRenderer: (params: any) => (
@@ -191,8 +186,6 @@ const ViewHistoryList = () => {
       {
         field: "createdAt",
         headerName: "Created Date",
-        minWidth: 180,
-        maxWidth: 250,
         filter: true,
         flex: 1,
         cellRenderer: (params: any) => {
@@ -210,9 +203,6 @@ const ViewHistoryList = () => {
 
       {
         headerName: "Actions",
-        minWidth: 180,
-        maxWidth: 220,
-        pinned: "right",
         cellRenderer: (params: any) => {
           return (
             <div className="flex items-center gap-2">
